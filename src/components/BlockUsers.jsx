@@ -2,14 +2,12 @@ import React from "react";
 import { Button } from "@mui/material";
 import profile from "../assets/profile.png";
 
-const GroupList = () => {
+const BlockUsers = () => {
   return (
     <div className="box">
       <div className="title">
-        <h3>Group List</h3>
-        <Button variant="contained">Create Group</Button>
+        <h3>Block Users</h3>
       </div>
-
       <div className="list">
         <div className="img">
           <img src={profile} />
@@ -122,4 +120,4 @@ const GroupList = () => {
   );
 };
 
-export default GroupList;
+export default BlockUsers;
