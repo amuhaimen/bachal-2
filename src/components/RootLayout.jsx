@@ -8,10 +8,14 @@ import { RiNotification2Fill } from "react-icons/ri";
 import { FiSettings } from "react-icons/fi";
 import { VscSignOut } from "react-icons/vsc";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const RootLayout = () => {
   const location = useLocation();
   console.log(location.pathname);
+
+  let userData = useSelector((state) => state.loggedUser.loginUser);
+
   return (
     <>
       <Grid container spacing={2}>
@@ -19,6 +23,7 @@ const RootLayout = () => {
           <div className="navbar">
             <div className="navcontainer">
               <img src={profile} />
+              <h4 className="username">{userData.displayName}</h4>
               <ul>
                 <li>
                   <Link

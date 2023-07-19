@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, TextField, Button, Alert } from "@mui/material";
 import login from "../assets/loginimg.png";
 import google from "../assets/google.png";
@@ -13,7 +13,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { RiEyeFill, RiEyeCloseFill } from "react-icons/ri";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { userdata } from "../slices/user/userSlice";
 
 let initialValues = {
@@ -30,6 +30,13 @@ const Login = () => {
   let navigate = useNavigate();
   let [values, setValues] = useState(initialValues);
   let dispatch = useDispatch();
+  // let loginUser = useSelector((state) => state.loggedUser.loginUser);
+
+  // useEffect(() => {
+  //   if (loginUser != null) {
+  //     navigate("/bachal2");
+  //   }
+  // }, []);
 
   let handleValues = (e) => {
     setValues({
@@ -74,6 +81,7 @@ const Login = () => {
           toast("Please verify your email first");
         } else {
           dispatch(userdata(user.user));
+          localStorage.setItem("user", JSON.stringify(user.user));
           navigate("/bachal2");
           toast("successfully signed in");
         }
