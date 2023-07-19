@@ -156,7 +156,7 @@ ul li {
 
 .list {
   display: flex;
-  column-gap: 120px;
+  column-gap: 80px;
   align-items: center;
   margin: 20px 0;
   border-bottom: 1px solid #000;

@@ -9,7 +9,6 @@ const GroupList = () => {
         <h3>Group List</h3>
         <Button variant="contained">Create Group</Button>
       </div>
-
       <div className="list">
         <div className="img">
           <img src={profile} />

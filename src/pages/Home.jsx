@@ -25,25 +25,26 @@ const Home = () => {
   };
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={4}>
-        <GroupList />
-        <FriendRq />
+    <>
+      <Grid container spacing={2}>
+        <Grid item xs={4}>
+          <GroupList />
+          <FriendRq />
+        </Grid>
+        <Grid item xs={4}>
+          <Friends />
+          <MyGroups />
+        </Grid>
+        <Grid item xs={4}>
+          <UserList />
+          <BlockUsers />
+        </Grid>
       </Grid>
-      <Grid item xs={4}>
-        <Friends />
-        <MyGroups />
-      </Grid>
-      <Grid item xs={4}>
-        <UserList />
-        <BlockUsers />
-      </Grid>
-    </Grid>
-    // <div>
-    //   <Button onClick={handleLogut} variant="contained">
-    //     Sign Out
-    //   </Button>
-    // </div>
+
+      <Button onClick={handleLogut} variant="contained">
+        Sign Out
+      </Button>
+    </>
   );
 };
 

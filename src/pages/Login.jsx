@@ -13,6 +13,8 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { RiEyeFill, RiEyeCloseFill } from "react-icons/ri";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { userdata } from "../slices/user/userSlice";
 
 let initialValues = {
   email: "",
@@ -27,7 +29,7 @@ const Login = () => {
   const provider = new GoogleAuthProvider();
   let navigate = useNavigate();
   let [values, setValues] = useState(initialValues);
-  const notify = () => toast("Successfully sign in");
+  let dispatch = useDispatch();
 
   let handleValues = (e) => {
     setValues({
@@ -67,8 +69,14 @@ const Login = () => {
           password: "",
           loading: false,
         });
-        notify();
-        navigate("/bachal2");
+
+        if (!user.user.emailVerified) {
+          toast("Please verify your email first");
+        } else {
+          dispatch(userdata(user.user));
+          navigate("/bachal2");
+          toast("successfully signed in");
+        }
         // console.log(user);
       })
       .catch((error) => {
@@ -178,3 +186,5 @@ const Login = () => {
 };
 
 export default Login;
+
+//Dew: wrong pass warning,worng user warning(class-49)

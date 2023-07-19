@@ -7,9 +7,12 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
 import { useNavigate, Link } from "react-router-dom";
 import { RiEyeFill, RiEyeCloseFill } from "react-icons/ri";
+import { toast } from "react-toastify";
 
 let initialValues = {
   email: "",
@@ -24,6 +27,9 @@ const Registration = () => {
   let navigate = useNavigate();
   let [values, setValues] = useState(initialValues);
   const auth = getAuth();
+  const db = getDatabase();
+  const notify = () =>
+    toast(" Regitration successfull, please check your email");
 
   let handleValues = (e) => {
     setValues({
@@ -61,17 +67,29 @@ const Registration = () => {
       ...values,
       loading: true,
     });
-    createUserWithEmailAndPassword(auth, email, password).then((u) => {
-      console.log(u);
-      sendEmailVerification(auth.currentUser).then(() => {
-        console.log("Email sent");
+    createUserWithEmailAndPassword(auth, email, password).then((user) => {
+      updateProfile(auth.currentUser, {
+        displayName: values.fullName,
+        photoURL: "https://i.ibb.co/rM8Vhxh/avatar2.png",
+      }).then(() => {
+        sendEmailVerification(auth.currentUser).then(() => {
+          console.log("Email sent");
+          console.log(user);
+          set(ref(db, "users/" + user.user.uid), {
+            username: user.user.displayName,
+            email: user.user.email,
+            profile_picture: user.user.photoURL,
+          }).then(() => {});
+        });
       });
+
       setValues({
         email: "",
         fullName: "",
         password: "",
         loading: false,
       });
+      notify();
       navigate("/login");
     });
   };
