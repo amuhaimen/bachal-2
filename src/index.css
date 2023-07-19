@@ -156,7 +156,7 @@ ul li {
 
 .list {
   display: flex;
-  column-gap: 80px;
+  justify-content: space-between;
   align-items: center;
   margin: 20px 0;
   border-bottom: 1px solid #000;
@@ -185,4 +185,9 @@ ul li {
 }
 .username {
   color: #fff;
+}
+
+.button {
+  display: flex;
+  column-gap: 10px;
 }

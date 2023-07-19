@@ -1,27 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import profile from "../assets/profile.png";
-import { getDatabase, ref, onValue, set, push } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  set,
+  push,
+  remove,
+} from "firebase/database";
 import { getAuth } from "firebase/auth";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const UserList = () => {
   let [userList, setUserList] = useState([]);
-  let [friendRequest, setFriendRequest] = useState([]);
+  let [freq, setFreq] = useState([]);
+  let [friends, setFriends] = useState([]);
   const auth = getAuth();
   const db = getDatabase();
 
-  useEffect(() => {
-    const friendRqRef = ref(db, "friendrequest/");
-    onValue(friendRqRef, (snapshot) => {
-      let arr = [];
-      // const data = snapshot.val();
-      snapshot.forEach((item) => {
-        arr.push(item.val().whoreceiveid + item.val().whosendid);
-      });
-      setFriendRequest(arr);
-    });
-  }, []);
+  let loginUser = useSelector((state) => state.loggedUser.loginUser);
 
   useEffect(() => {
     const usersRef = ref(db, "users/");
@@ -29,33 +28,78 @@ const UserList = () => {
       let arr = [];
       // const data = snapshot.val();
       snapshot.forEach((item) => {
-        arr.push({ ...item.val(), id: item.key });
+        if (loginUser.uid != item.key) {
+          arr.push({ ...item.val(), id: item.key });
+        }
       });
       setUserList(arr);
     });
     console.log(userList);
   }, []);
 
+  useEffect(() => {
+    const userRef = ref(db, "friendrequest/");
+    onValue(userRef, (snapshot) => {
+      let arr = [];
+      snapshot.forEach((item) => {
+        arr.push(item.val().whoreceiveid + item.val().whosendid);
+        // console.log(item.val().receiverid + item.val().senderid);
+      });
+      setFreq(arr);
+    });
+  }, []);
+
+  useEffect(() => {
+    const userRef = ref(db, "friends/");
+    onValue(userRef, (snapshot) => {
+      let arr = [];
+      snapshot.forEach((item) => {
+        arr.push(item.val().whoreceiveid + item.val().whosendid);
+        // console.log(item.val().receiverid + item.val().senderid);
+      });
+      setFriends(arr);
+    });
+  }, []);
+
   let handleFriendRequest = (item) => {
     // console.log("k pathaiche", auth.currentUser.uid);
     // console.log("kake pathaiche", item.id);
-    set(push(ref(db, "friendrequest/")), {
+    set(ref(db, "friendrequest/" + item.id), {
       whosendid: auth.currentUser.uid,
       whosendname: auth.currentUser.displayName,
+      whosendemail: auth.currentUser.email,
       whoreceiveid: item.id,
       whoreceivename: item.username,
+      whoreceiveemail: item.email,
     }).then(() => {
       toast("friend request sent");
     });
   };
+
+  let handleCancel = (item) => {
+    console.log("hello");
+    remove(ref(db, "friendrequest/" + item.id));
+  };
+
+  // let handleFriendRequest = (item) => {
+  //   set(push(ref(db, "friendrequest/")), {
+  //     sendername: loginUser.displayName,
+  //     senderid: loginUser.uid,
+  //     senderemail: loginUser.email,
+  //     receivername: item.username,
+  //     receiverid: item.id,
+  //     receiveremail: item.email,
+  //   });
+  //   console.log(item);
+  // };
 
   return (
     <div className="box">
       <div className="title">
         <h3>User List</h3>
       </div>
-      {userList.map((item) => (
-        <div className="list">
+      {userList.map((item, index) => (
+        <div key={index} className="list">
           <div className="img">
             <img src={profile} />
           </div>
@@ -64,8 +108,17 @@ const UserList = () => {
             <p>{item.email}</p>
           </div>
           <div className="button">
-            {friendRequest.includes(item.id + auth.currentUser.uid) ? (
-              <Button variant="contained">panding</Button>
+            {freq.includes(item.id + auth.currentUser.uid) ? (
+              <Button onClick={() => handleCancel(item)} variant="contained">
+                Cancel
+              </Button>
+            ) : freq.includes(auth.currentUser.uid + item.id) ? (
+              <Button variant="contained">Pending</Button>
+            ) : friends.includes(auth.currentUser.uid + item.id) ||
+              friends.includes(item.id + auth.currentUser.uid) ? (
+              <Button variant="contained" color="success">
+                Friends
+              </Button>
             ) : (
               <Button
                 onClick={() => handleFriendRequest(item)}

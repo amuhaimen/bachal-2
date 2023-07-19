@@ -19,21 +19,6 @@ const Home = () => {
     }
   }, []);
 
-  const auth = getAuth();
-  let navigate = useNavigate();
-  let handleLogut = () => {
-    // console.log("hello");
-    signOut(auth)
-      .then(() => {
-        console.log("signout done");
-        localStorage.removeItem("user");
-        navigate("/login");
-      })
-      .catch((error) => {
-        // An error happened.
-      });
-  };
-
   return (
     <>
       <Grid container spacing={2}>
@@ -51,9 +36,9 @@ const Home = () => {
         </Grid>
       </Grid>
 
-      <Button onClick={handleLogut} variant="contained">
+      {/* <Button onClick={handleLogut} variant="contained">
         Sign Out
-      </Button>
+      </Button> */}
     </>
   );
 };

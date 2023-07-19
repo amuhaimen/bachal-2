@@ -7,14 +7,30 @@ import { AiOutlineMessage } from "react-icons/ai";
 import { RiNotification2Fill } from "react-icons/ri";
 import { FiSettings } from "react-icons/fi";
 import { VscSignOut } from "react-icons/vsc";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { getAuth, signOut } from "firebase/auth";
 
 const RootLayout = () => {
   const location = useLocation();
   console.log(location.pathname);
 
   let userData = useSelector((state) => state.loggedUser.loginUser);
+
+  const auth = getAuth();
+  let navigate = useNavigate();
+  let handleLogut = () => {
+    // console.log("hello");
+    signOut(auth)
+      .then(() => {
+        console.log("signout done");
+        localStorage.removeItem("user");
+        navigate("/login");
+      })
+      .catch((error) => {
+        // An error happened.
+      });
+  };
 
   return (
     <>
@@ -54,7 +70,7 @@ const RootLayout = () => {
                   <FiSettings className="icon" />
                 </li>
                 <li>
-                  <VscSignOut className="icon" />
+                  <VscSignOut onClick={handleLogut} className="icon" />
                 </li>
               </ul>
             </div>
