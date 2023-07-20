@@ -17,7 +17,7 @@ const BlockUsers = () => {
           <p>Hi Guys, Wassup!</p>
         </div>
         <div className="button">
-          <Button variant="contained">Join</Button>
+          <Button variant="contained">Unblock</Button>
         </div>
       </div>
       <div className="list">
@@ -29,7 +29,7 @@ const BlockUsers = () => {
           <p>Hi Guys, Wassup!</p>
         </div>
         <div className="button">
-          <Button variant="contained">Join</Button>
+          <Button variant="contained">Unblock</Button>
         </div>
       </div>
       <div className="list">
@@ -41,7 +41,7 @@ const BlockUsers = () => {
           <p>Hi Guys, Wassup!</p>
         </div>
         <div className="button">
-          <Button variant="contained">Join</Button>
+          <Button variant="contained">Unblock</Button>
         </div>
       </div>
       <div className="list">
@@ -53,7 +53,7 @@ const BlockUsers = () => {
           <p>Hi Guys, Wassup!</p>
         </div>
         <div className="button">
-          <Button variant="contained">Join</Button>
+          <Button variant="contained">Unblock</Button>
         </div>
       </div>
       <div className="list">
@@ -65,7 +65,7 @@ const BlockUsers = () => {
           <p>Hi Guys, Wassup!</p>
         </div>
         <div className="button">
-          <Button variant="contained">Join</Button>
+          <Button variant="contained">Unblock</Button>
         </div>
       </div>
       <div className="list">
@@ -77,43 +77,7 @@ const BlockUsers = () => {
           <p>Hi Guys, Wassup!</p>
         </div>
         <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
+          <Button variant="contained">Unblock</Button>
         </div>
       </div>
     </div>
