@@ -14,27 +14,26 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
 const UserList = () => {
-  let [userList, setUserList] = useState([]);
-  let [freq, setFreq] = useState([]);
-  let [friends, setFriends] = useState([]);
   const auth = getAuth();
   const db = getDatabase();
 
   let loginUser = useSelector((state) => state.loggedUser.loginUser);
 
+  let [userList, setUserList] = useState([]);
+  let [freq, setFreq] = useState([]);
+  let [friends, setFriends] = useState([]);
+  let [blocklist, setBlocklist] = useState([]);
+
   useEffect(() => {
-    const usersRef = ref(db, "users/");
-    onValue(usersRef, (snapshot) => {
+    const blockRef = ref(db, "block/");
+    onValue(blockRef, (snapshot) => {
       let arr = [];
-      // const data = snapshot.val();
       snapshot.forEach((item) => {
-        if (loginUser.uid != item.key) {
-          arr.push({ ...item.val(), id: item.key });
-        }
+        arr.push(item.val().blockid + item.val().blockbyid);
+        // console.log(item.val().receiverid + item.val().senderid);
       });
-      setUserList(arr);
+      setBlocklist(arr);
     });
-    console.log(userList);
   }, []);
 
   useEffect(() => {
@@ -59,6 +58,21 @@ const UserList = () => {
       });
       setFriends(arr);
     });
+  }, []);
+
+  useEffect(() => {
+    const usersRef = ref(db, "users/");
+    onValue(usersRef, (snapshot) => {
+      let arr = [];
+      // const data = snapshot.val();
+      snapshot.forEach((item) => {
+        if (loginUser.uid != item.key) {
+          arr.push({ ...item.val(), id: item.key });
+        }
+      });
+      setUserList(arr);
+    });
+    console.log(userList);
   }, []);
 
   let handleFriendRequest = (item) => {
@@ -94,7 +108,12 @@ const UserList = () => {
             <p>{item.email}</p>
           </div>
           <div className="button">
-            {freq.includes(item.id + auth.currentUser.uid) ? (
+            {blocklist.includes(item.id + loginUser.uid) ||
+            blocklist.includes(loginUser.uid + item.id) ? (
+              <Button variant="contained" disabled>
+                Blocked
+              </Button>
+            ) : freq.includes(item.id + auth.currentUser.uid) ? (
               <Button onClick={() => handleCancel(item)} variant="contained">
                 Cancel
               </Button>

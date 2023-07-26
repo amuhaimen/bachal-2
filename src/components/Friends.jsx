@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Alert } from "@mui/material";
 import profile from "../assets/profile.png";
-import { getDatabase, ref, onValue, remove } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  remove,
+  set,
+  push,
+} from "firebase/database";
 import { useSelector } from "react-redux";
-import Alert from "@mui/material/Alert";
 
 const Friends = () => {
   const db = getDatabase();
   let [friends, setFriends] = useState([]);
+  let [blocklist, setBlocklist] = useState([]);
   let userData = useSelector((state) => state.loggedUser.loginUser);
-
+  console.log(userData);
   useEffect(() => {
     const friendsRef = ref(db, "friends/");
     onValue(friendsRef, (snapshot) => {
       let arr = [];
-
       snapshot.forEach((item) => {
         if (
           item.val().whosendid == userData.uid ||
@@ -31,6 +37,30 @@ const Friends = () => {
     remove(ref(db, "friends/" + id));
   };
 
+  let handleBlock = (item) => {
+    console.log(item);
+
+    if (userData.uid == item.whosendid) {
+      set(push(ref(db, "block/")), {
+        blockid: item.whoreceiveid,
+        blockname: item.whoreceivename,
+        blockbyid: item.whosendid,
+        blockbyname: item.whosendname,
+      }).then(() => {
+        remove(ref(db, "friends/" + item.id));
+      });
+    } else {
+      set(push(ref(db, "block/")), {
+        blockid: item.whosendid,
+        blockname: item.whosendname,
+        blockbyid: item.whoreceiveid,
+        blockbyname: item.whoreceivename,
+      }).then(() => {
+        remove(ref(db, "friends/" + item.id));
+      });
+    }
+  };
+
   return (
     <div className="box">
       <div className="title">
@@ -38,8 +68,8 @@ const Friends = () => {
       </div>
 
       {friends.length > 0 ? (
-        friends.map((item) => (
-          <div className="list">
+        friends.map((item, index) => (
+          <div key={index} className="list">
             <div className="img">
               <img src={profile} />
             </div>
@@ -64,7 +94,11 @@ const Friends = () => {
               >
                 Unfriend
               </Button>
-              <Button variant="contained" color="error">
+              <Button
+                onClick={() => handleBlock(item)}
+                variant="contained"
+                color="error"
+              >
                 Block
               </Button>
             </div>

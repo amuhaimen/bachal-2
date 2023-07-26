@@ -13,12 +13,14 @@ import {
 import Alert from "@mui/material/Alert";
 
 const FriendRq = () => {
-  let loginUser = useSelector((state) => state.loggedUser.loginUser);
   const db = getDatabase();
+
+  let loginUser = useSelector((state) => state.loggedUser.loginUser);
+
   let [freq, setFreq] = useState([]);
 
   useEffect(() => {
-    const freqRef = ref(db, "friendrequest/");
+    const freqRef = ref(db, "friendrequest");
     onValue(freqRef, (snapshot) => {
       let arr = [];
       snapshot.forEach((item) => {
