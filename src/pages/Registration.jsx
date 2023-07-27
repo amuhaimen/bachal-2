@@ -6,93 +6,131 @@ import Headingreglog from "../components/Headingreglog";
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   updateProfile,
+  sendEmailVerification,
 } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 import { useNavigate, Link } from "react-router-dom";
 import { RiEyeFill, RiEyeCloseFill } from "react-icons/ri";
 import { toast } from "react-toastify";
 
-let initialValues = {
-  email: "",
-  fullName: "",
-  password: "",
-  loading: false,
-  error: "",
-  eye: false,
-};
-
 const Registration = () => {
   let navigate = useNavigate();
-  let [values, setValues] = useState(initialValues);
   const auth = getAuth();
   const db = getDatabase();
-  const notify = () =>
-    toast(" Regitration successfull, please check your email");
 
+  let [show, setShow] = useState(false);
+  let [values, setValues] = useState({
+    email: "",
+    fullName: "",
+    password: "",
+  });
+
+  let [error, setError] = useState({
+    email: "",
+    fullName: "",
+    password: "",
+  });
   let handleValues = (e) => {
+    let { name, value } = e.target;
     setValues({
       ...values,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
-    // console.log(values);
+    setError({ ...error, [name]: "" });
   };
 
   let handleSubmit = () => {
-    let { email, fullName, password } = values;
-    if (!email) {
-      setValues({
-        ...values,
-        error: "Enter an email",
-      });
-      return;
-    }
-    if (!fullName) {
-      setValues({
-        ...values,
-        error: "Enter your fullName",
-      });
-      return;
-    }
-    if (!password) {
-      setValues({
-        ...values,
-        error: "Enter password",
-      });
-      return;
-    }
-
-    setValues({
-      ...values,
-      loading: true,
-    });
-    createUserWithEmailAndPassword(auth, email, password).then((user) => {
-      updateProfile(auth.currentUser, {
-        displayName: values.fullName,
-        photoURL: "https://i.ibb.co/rM8Vhxh/avatar2.png",
-      }).then(() => {
-        sendEmailVerification(auth.currentUser).then(() => {
-          console.log("Email sent");
-          console.log(user);
-          set(ref(db, "users/" + user.user.uid), {
-            username: user.user.displayName,
-            email: user.user.email,
-            profile_picture: user.user.photoURL,
-          }).then(() => {});
+    console.log("hello");
+    if (values.email == "") {
+      setError({ ...error, email: "email Required" });
+      console.log("email nai");
+    } else if (values.fullName == "") {
+      setError({ ...error, fullName: "fullName Required" });
+      console.log("nam nai");
+    } else if (values.password == "") {
+      setError({ ...error, password: "password Required" });
+      console.log("password nai");
+    } else {
+      createUserWithEmailAndPassword(auth, values.email, values.password)
+        .then((user) => {
+          updateProfile(auth.currentUser, {
+            displayName: values.fullName,
+            photoURL: "https://i.ibb.co/rM8Vhxh/avatar2.png",
+          }).then(() => {
+            sendEmailVerification(auth.currentUser).then(() => {
+              set(ref(db, "users/" + user.user.uid), {
+                username: user.user.displayName,
+                email: user.user.email,
+                profile_picture: user.user.photoURL,
+              }).then(() => {
+                toast("Regitration successful ,please check your email");
+                navigate("/login");
+              });
+            });
+          });
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          if (errorCode.includes("auth/email-already-in-use")) {
+            setError({ ...error, email: "Email Already Exists" });
+          }
         });
-      });
-
-      setValues({
-        email: "",
-        fullName: "",
-        password: "",
-        loading: false,
-      });
-      notify();
-      navigate("/login");
-    });
+    }
   };
+  // let { email, fullName, password } = values;
+  // if (!email) {
+  //   setValues({
+  //     ...values,
+  //     error: "Enter an email",
+  //   });
+  //   return;
+  // }
+  // if (!fullName) {
+  //   setValues({
+  //     ...values,
+  //     error: "Enter your fullName",
+  //   });
+  //   return;
+  // }
+  // if (!password) {
+  //   setValues({
+  //     ...values,
+  //     error: "Enter password",
+  //   });
+  //   return;
+  // }
+
+  // setValues({
+  //   ...values,
+  //   loading: true,
+  // });
+  // createUserWithEmailAndPassword(auth, email, password).then((user) => {
+  //   updateProfile(auth.currentUser, {
+  //     displayName: values.fullName,
+  //     photoURL: "https://i.ibb.co/rM8Vhxh/avatar2.png",
+  //   }).then(() => {
+  //     sendEmailVerification(auth.currentUser).then(() => {
+  //       console.log("Email sent");
+  //       console.log(user);
+  //       set(ref(db, "users/" + user.user.uid), {
+  //         username: user.user.displayName,
+  //         email: user.user.email,
+  //         profile_picture: user.user.photoURL,
+  //       }).then(() => {});
+  //     });
+  //   });
+
+  //   setValues({
+  //     email: "",
+  //     fullName: "",
+  //     password: "",
+  //     loading: false,
+  //   });
+  //   notify();
+  //   navigate("/login");
+  // });
 
   return (
     <Grid container spacing={2}>
@@ -113,11 +151,12 @@ const Registration = () => {
               value={values.email}
             />
           </div>
-          {values.error.includes("email") && (
+          {error.email && (
             <Alert style={{ margin: "20px 0", width: "75%" }} severity="error">
-              {values.error}
+              {error.email}
             </Alert>
           )}
+
           <div className="reginput">
             <TextField
               onChange={handleValues}
@@ -128,32 +167,35 @@ const Registration = () => {
               value={values.fullName}
             />
           </div>
-          {values.error.includes("fullName") && (
+          {error.fullName && (
             <Alert style={{ margin: "20px 0", width: "75%" }} severity="error">
-              {values.error}
+              {error.fullName}
             </Alert>
           )}
+
           <div className="reginput">
             <TextField
               onChange={handleValues}
               id="outlined-basic"
               label="Password"
               variant="outlined"
-              type={values.eye ? "text" : "password"}
+              type={show ? "text" : "password"}
               name="password"
               value={values.password}
             />
           </div>
-          {values.error.includes("password") && (
+          {error.password && (
             <Alert style={{ margin: "20px 0", width: "75%" }} severity="error">
-              {values.error}
+              {error.password}
             </Alert>
           )}
-          <div
-            onClick={() => setValues({ ...values, eye: !values.eye })}
-            className="eye"
-          >
-            {values.eye ? <RiEyeFill /> : <RiEyeCloseFill />}
+
+          <div className="eye">
+            {show ? (
+              <RiEyeFill onClick={() => setShow(false)} />
+            ) : (
+              <RiEyeCloseFill onClick={() => setShow(true)} />
+            )}
           </div>
           <Alert style={{ margin: "20px 0", width: "75%" }} severity="info">
             Already have an account
@@ -161,15 +203,14 @@ const Registration = () => {
               <Link to="/login">Sign In</Link>
             </strong>
           </Alert>
-          {values.loading ? (
-            <LoadingButton loading variant="outlined">
-              Submit
-            </LoadingButton>
-          ) : (
-            <Button onClick={handleSubmit} variant="contained">
-              Sign Up
-            </Button>
-          )}
+
+          <LoadingButton loading variant="outlined">
+            Submit
+          </LoadingButton>
+
+          <Button onClick={handleSubmit} variant="contained">
+            Sign Up
+          </Button>
         </div>
       </Grid>
       <Grid item xs={6}>
