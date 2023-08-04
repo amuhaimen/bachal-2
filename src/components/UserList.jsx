@@ -67,6 +67,7 @@ const UserList = () => {
       // const data = snapshot.val();
       snapshot.forEach((item) => {
         if (loginUser.uid != item.key) {
+          //email varified na hole ekhane add hobe na
           arr.push({ ...item.val(), id: item.key });
         }
       });

@@ -8,7 +8,7 @@ import { RiNotification2Fill } from "react-icons/ri";
 import { FiSettings } from "react-icons/fi";
 import { VscSignOut } from "react-icons/vsc";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { getAuth, signOut } from "firebase/auth";
 
 const RootLayout = () => {
@@ -16,6 +16,7 @@ const RootLayout = () => {
   console.log(location.pathname);
 
   let userData = useSelector((state) => state.loggedUser.loginUser);
+  let dispatch = useDispatch();
 
   const auth = getAuth();
   let navigate = useNavigate();
@@ -23,8 +24,8 @@ const RootLayout = () => {
     // console.log("hello");
     signOut(auth)
       .then(() => {
-        console.log("signout done");
         localStorage.removeItem("user");
+        // dispatch(userData(null));
         navigate("/login");
       })
       .catch((error) => {

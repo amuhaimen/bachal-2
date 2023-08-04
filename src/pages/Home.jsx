@@ -14,7 +14,7 @@ const Home = () => {
   let loginUser = useSelector((state) => state.loggedUser.loginUser);
 
   useEffect(() => {
-    if (loginUser == null) {
+    if (!loginUser.user) {
       navigate("/login");
     }
   }, []);

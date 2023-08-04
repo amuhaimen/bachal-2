@@ -15,88 +15,79 @@ import { RiEyeFill, RiEyeCloseFill } from "react-icons/ri";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { userdata } from "../slices/user/userSlice";
-
 let initialValues = {
   email: "",
   password: "",
-  loading: false,
-  error: "",
-  eye: false,
 };
 
 const Login = () => {
   const auth = getAuth();
-  const provider = new GoogleAuthProvider();
-  let navigate = useNavigate();
-  let [values, setValues] = useState(initialValues);
   let dispatch = useDispatch();
-  // let loginUser = useSelector((state) => state.loggedUser.loginUser);
-
-  // useEffect(() => {
-  //   if (loginUser != null) {
-  //     navigate("/bachal2");
-  //   }
-  // }, []);
+  const navigate = useNavigate();
+  let [values, setValues] = useState(initialValues);
+  let [error, setError] = useState({
+    email: "",
+    password: "",
+    loader: false,
+  });
 
   let handleValues = (e) => {
-    setValues({
-      ...values,
-      [e.target.name]: e.target.value,
-    });
+    let { name, value } = e.target;
+    setValues({ ...values, [name]: value });
+    setError({ ...error, [name]: "" });
   };
 
-  let handleSubmit = () => {
-    let { email, password } = values;
+  let handleClick = () => {
+    setValues({ ...values, loader: true });
+    let expression =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (values.email == "") {
+      setValues({ ...values, loader: false });
+      setError({ ...error, email: "Email Required" });
+    } else if (!expression.test(values.email)) {
+      setValues({ ...values, loader: false });
+      setError({ ...error, email: "valid email required" });
+    } else if (values.password == "") {
+      setValues({ ...values, loader: false });
+      setError({ ...error, password: "Password Required" });
+    } else {
+      signInWithEmailAndPassword(auth, values.email, values.password)
+        .then((user) => {
+          if (!user.user.emailVerified) {
+            setValues({ ...values, loader: false });
+            setError({ ...error, email: "please verify your email" });
+            toast("please varify your email first");
+          } else {
+            dispatch(userdata(user.user));
+            localStorage.setItem("user", JSON.stringify(user.user));
+            navigate("/bachal2");
+            toast("successfully log in");
+          }
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
 
-    if (!email) {
-      setValues({
-        ...values,
-        error: "Enter an email",
-      });
-      return;
-    }
-    if (!password) {
-      setValues({
-        ...values,
-        error: "Enter password",
-      });
-      return;
-    }
-
-    setValues({
-      ...values,
-      loading: true,
-    });
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then((user) => {
-        setValues({
-          ...values,
-          email: "",
-          password: "",
-          loading: false,
+          if (errorCode.includes("auth/user-not-found")) {
+            setValues({ ...values, loader: false });
+            setError({ ...error, email: "User not found" });
+          }
+          if (errorCode.includes("auth/wrong-password")) {
+            setValues({ ...values, loader: false });
+            setError({ ...error, password: "Wrong Password" });
+          }
         });
-
-        if (!user.user.emailVerified) {
-          toast("Please verify your email first");
-        } else {
-          dispatch(userdata(user.user));
-          localStorage.setItem("user", JSON.stringify(user.user));
-          navigate("/bachal2");
-          toast("successfully signed in");
-        }
-        // console.log(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-      });
-  };
-
-  let handleGoogle = () => {
-    signInWithPopup(auth, provider).then((result) => {
-      console.log(result);
-    });
+      //   if (!user.user.emailVerified) {
+      //     toast("Please verify your email first");
+      //   } else {
+      //     dispatch(userdata(user.user));
+      //     localStorage.setItem("user", JSON.stringify(user.user));
+      //     navigate("/bachal2");
+      //     toast("successfully signed in");
+      //   }
+      //   // console.log(user);
+      // })
+    }
   };
 
   return (
@@ -108,52 +99,46 @@ const Login = () => {
             title="Login to your account!"
           />
 
-          <img onClick={handleGoogle} src={google} className="google" />
+          <img src={google} className="google" />
 
           <div className="reginput">
             <TextField
-              name="email"
               onChange={handleValues}
+              name="email"
               value={values.email}
               id="outlined-basic"
               label="Email Address"
               variant="outlined"
             />
+            {error.email && (
+              <Alert
+                style={{ margin: "20px 0", width: "75%" }}
+                severity="error"
+              >
+                {error.email}
+              </Alert>
+            )}
           </div>
-          {values.error.includes("email") && (
-            <Alert
-              style={{ marginBottom: "20px", width: "75%" }}
-              severity="error"
-            >
-              {values.error}
-            </Alert>
-          )}
 
           <div className="reginput">
             <TextField
-              name="password"
               onChange={handleValues}
+              name="password"
               value={values.password}
               id="outlined-basic"
               label="Password"
-              type={values.eye ? "text" : "password"}
               variant="outlined"
             />
+            {error.password && (
+              <Alert
+                style={{ margin: "20px 0", width: "75%" }}
+                severity="error"
+              >
+                {error.password}
+              </Alert>
+            )}
           </div>
-          <div
-            onClick={() => setValues({ ...values, eye: !values.eye })}
-            className="eye"
-          >
-            {values.eye ? <RiEyeFill /> : <RiEyeCloseFill />}
-          </div>
-          {values.error.includes("password") && (
-            <Alert
-              style={{ marginBottom: "20px", width: "75%" }}
-              severity="error"
-            >
-              {values.error}
-            </Alert>
-          )}
+          <div className="eye"></div>
 
           <Alert style={{ marginBottom: "20px", width: "75%" }} severity="info">
             Don't have an account{" "}
@@ -161,19 +146,20 @@ const Login = () => {
               <Link to="/">Sign Up</Link>
             </strong>{" "}
           </Alert>
-          {values.loading ? (
+          {values.loader ? (
             <LoadingButton loading variant="outlined">
               Submit
             </LoadingButton>
           ) : (
             <Button
-              onClick={handleSubmit}
               className="loginbutton"
               variant="contained"
+              onClick={handleClick}
             >
               Login to Continue
             </Button>
           )}
+
           <Alert
             style={{ margin: "20px 0", width: "75%" }}
             variant="filled"

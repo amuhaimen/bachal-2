@@ -14,17 +14,19 @@ import { useNavigate, Link } from "react-router-dom";
 import { RiEyeFill, RiEyeCloseFill } from "react-icons/ri";
 import { toast } from "react-toastify";
 
+let initialValues = {
+  email: "",
+  fullName: "",
+  password: "",
+  loader: false,
+  eye: false,
+};
+
 const Registration = () => {
   let navigate = useNavigate();
   const auth = getAuth();
   const db = getDatabase();
-
-  let [show, setShow] = useState(false);
-  let [values, setValues] = useState({
-    email: "",
-    fullName: "",
-    password: "",
-  });
+  let [values, setValues] = useState(initialValues);
 
   let [error, setError] = useState({
     email: "",
@@ -33,6 +35,7 @@ const Registration = () => {
   });
   let handleValues = (e) => {
     let { name, value } = e.target;
+
     setValues({
       ...values,
       [name]: value,
@@ -41,15 +44,24 @@ const Registration = () => {
   };
 
   let handleSubmit = () => {
-    console.log("hello");
+    let expression =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    setValues({ ...values, loader: true });
     if (values.email == "") {
       setError({ ...error, email: "email Required" });
-      console.log("email nai");
+      setValues({ ...values, loader: false });
+      // console.log("email nai");
+    } else if (!expression.test(values.email)) {
+      setError({ ...error, email: "valid email Required" });
+      setValues({ ...values, loader: false, email: "" });
     } else if (values.fullName == "") {
       setError({ ...error, fullName: "fullName Required" });
+      setValues({ ...values, loader: false });
       console.log("nam nai");
     } else if (values.password == "") {
       setError({ ...error, password: "password Required" });
+      setValues({ ...values, loader: false });
       console.log("password nai");
     } else {
       createUserWithEmailAndPassword(auth, values.email, values.password)
@@ -65,6 +77,7 @@ const Registration = () => {
                 profile_picture: user.user.photoURL,
               }).then(() => {
                 toast("Regitration successful ,please check your email");
+                setValues({ ...values, loader: false });
                 navigate("/login");
               });
             });
@@ -75,6 +88,7 @@ const Registration = () => {
           const errorMessage = error.message;
           if (errorCode.includes("auth/email-already-in-use")) {
             setError({ ...error, email: "Email Already Exists" });
+            setValues({ ...values, loader: false });
           }
         });
     }
@@ -179,7 +193,7 @@ const Registration = () => {
               id="outlined-basic"
               label="Password"
               variant="outlined"
-              type={show ? "text" : "password"}
+              type={values.eye ? "text" : "password"}
               name="password"
               value={values.password}
             />
@@ -191,10 +205,12 @@ const Registration = () => {
           )}
 
           <div className="eye">
-            {show ? (
-              <RiEyeFill onClick={() => setShow(false)} />
+            {values.eye ? (
+              <RiEyeFill onClick={() => setValues({ ...values, eye: false })} />
             ) : (
-              <RiEyeCloseFill onClick={() => setShow(true)} />
+              <RiEyeCloseFill
+                onClick={() => setValues({ ...values, eye: true })}
+              />
             )}
           </div>
           <Alert style={{ margin: "20px 0", width: "75%" }} severity="info">
@@ -203,14 +219,15 @@ const Registration = () => {
               <Link to="/login">Sign In</Link>
             </strong>
           </Alert>
-
-          <LoadingButton loading variant="outlined">
-            Submit
-          </LoadingButton>
-
-          <Button onClick={handleSubmit} variant="contained">
-            Sign Up
-          </Button>
+          {values.loader ? (
+            <LoadingButton loading variant="outlined">
+              Submit
+            </LoadingButton>
+          ) : (
+            <Button onClick={handleSubmit} variant="contained">
+              Sign Up
+            </Button>
+          )}
         </div>
       </Grid>
       <Grid item xs={6}>
