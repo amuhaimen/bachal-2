@@ -1,7 +1,14 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { Button, Box, Typography, Modal, TextField } from "@mui/material";
 import { useSelector } from "react-redux";
-import { getDatabase, ref, set, push } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  set,
+  push,
+  onValue,
+  remove,
+} from "firebase/database";
 import { toast } from "react-toastify";
 import profile from "../assets/profile.png";
 
@@ -25,6 +32,8 @@ let groupData = {
 const GroupList = () => {
   const db = getDatabase();
   let userData = useSelector((state) => state.loggedUser.loginUser);
+  let [grouplist, setGrouplist] = useState([]);
+  let [groupMemberList, setGroupMemberList] = useState([]);
   const [groupInfo, setGroupInfo] = useState(groupData);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -47,6 +56,49 @@ const GroupList = () => {
       setOpen(false);
       toast(`${groupInfo.groupname} successfully created`);
     });
+  };
+
+  useEffect(() => {
+    const mygroupRef = ref(db, "groups/");
+    onValue(mygroupRef, (snapshot) => {
+      let arr = [];
+      snapshot.forEach((item) => {
+        if (userData.uid !== item.val().adminid) {
+          arr.push({ ...item.val(), groupid: item.key });
+        }
+      });
+      setGrouplist(arr);
+    });
+  }, []);
+
+  useEffect(() => {
+    const mygroupRef = ref(db, "grouprequest/");
+    onValue(mygroupRef, (snapshot) => {
+      let arr = [];
+      snapshot.forEach((item) => {
+        if (item.val().userid === userData.uid) {
+          arr.push(item.val().groupid);
+        }
+      });
+      setGroupMemberList(arr);
+    });
+  }, []);
+
+  let handleGroupJoin = (item) => {
+    console.log(item);
+    set(push(ref(db, "grouprequest/")), {
+      adminid: item.adminid,
+      adminname: item.adminname,
+      groupid: item.groupid,
+      groupname: item.groupname,
+      userid: userData.uid,
+      username: userData.displayName,
+    });
+  };
+
+  const handleCancel = (item) => {
+    console.log(item);
+    //remove deu......&*&*&*&*&*(&**&*&(&**&*&*&*&*&*&*&*&))
   };
 
   return (
@@ -92,114 +144,34 @@ const GroupList = () => {
           </Box>
         </Modal>
       </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
+      {grouplist.map((item) => (
+        <div className="list">
+          <div className="img">
+            <img src={profile} />
+          </div>
+          <div className="details">
+            <p style={{ fontSize: "10px" }}>{item.adminname}</p>
+            <h4>{item.groupname}</h4>
+            <p>{item.grouptagline}</p>
+          </div>
+          <div className="button">
+            {groupMemberList.indexOf(item.groupid) != -1 ? (
+              <>
+                <Button disabled variant="contained">
+                  Pending
+                </Button>
+                <Button onClick={() => handleCancel(item)} variant="contained">
+                  cancel
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => handleGroupJoin(item)} variant="contained">
+                Join
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
-      <div className="list">
-        <div className="img">
-          <img src={profile} />
-        </div>
-        <div className="details">
-          <h4>Friends Reunion</h4>
-          <p>Hi Guys, Wassup!</p>
-        </div>
-        <div className="button">
-          <Button variant="contained">Join</Button>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };

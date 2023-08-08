@@ -23,7 +23,8 @@ let initialValues = {
 const Login = () => {
   const auth = getAuth();
   let dispatch = useDispatch();
-  const navigate = useNavigate();
+  let navigate = useNavigate();
+
   let [values, setValues] = useState(initialValues);
   let [error, setError] = useState({
     email: "",

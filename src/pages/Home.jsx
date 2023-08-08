@@ -11,12 +11,15 @@ import BlockUsers from "../components/BlockUsers";
 import { useSelector } from "react-redux";
 
 const Home = () => {
+  let navigate = useNavigate();
   let loginUser = useSelector((state) => state.loggedUser.loginUser);
 
   useEffect(() => {
-    if (!loginUser.user) {
+    if (!loginUser) {
       navigate("/login");
     }
+
+    console.log(loginUser);
   }, []);
 
   return (
